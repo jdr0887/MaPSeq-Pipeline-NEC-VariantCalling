@@ -1,0 +1,25 @@
+digraph G {
+  PicardMarkDuplicatesCLI_1 [ label="PicardMarkDuplicatesCLI_1" ];
+  SAMToolsIndexCLI_2 [ label="SAMToolsIndexCLI_2" ];
+  GATKRealignerTargetCreatorCLI_3 [ label="GATKRealignerTargetCreatorCLI_3" ];
+  GATKIndelRealignerCLI_4 [ label="GATKIndelRealignerCLI_4" ];
+  PicardFixMateCLI_5 [ label="PicardFixMateCLI_5" ];
+  SAMToolsIndexCLI_6 [ label="SAMToolsIndexCLI_6" ];
+  GATKBaseRecalibratorCLI_7 [ label="GATKBaseRecalibratorCLI_7" ];
+  GATKPrintReadsCreatorCLI_8 [ label="GATKPrintReadsCreatorCLI_8" ];
+  SAMToolsIndexCLI_9 [ label="SAMToolsIndexCLI_9" ];
+  SAMToolsFlagstatCLI_10 [ label="SAMToolsFlagstatCLI_10" ];
+  GATKDepthOfCoverageCLI_11 [ label="GATKDepthOfCoverageCLI_11" ];
+  GATKUnifiedGenotyperCLI_12 [ label="GATKUnifiedGenotyperCLI_12" ];
+  PicardMarkDuplicatesCLI_1 -> SAMToolsIndexCLI_2;
+  SAMToolsIndexCLI_2 -> GATKRealignerTargetCreatorCLI_3;
+  GATKRealignerTargetCreatorCLI_3 -> GATKIndelRealignerCLI_4;
+  GATKIndelRealignerCLI_4 -> PicardFixMateCLI_5;
+  PicardFixMateCLI_5 -> SAMToolsIndexCLI_6;
+  SAMToolsIndexCLI_6 -> GATKBaseRecalibratorCLI_7;
+  GATKBaseRecalibratorCLI_7 -> GATKPrintReadsCreatorCLI_8;
+  GATKPrintReadsCreatorCLI_8 -> SAMToolsIndexCLI_9;
+  SAMToolsIndexCLI_9 -> SAMToolsFlagstatCLI_10;
+  SAMToolsIndexCLI_9 -> GATKDepthOfCoverageCLI_11;
+  GATKDepthOfCoverageCLI_11 -> GATKUnifiedGenotyperCLI_12;
+}
