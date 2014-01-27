@@ -113,7 +113,7 @@ public class NECVariantCallingMessageListener implements MessageListener {
 
                     if ("Workflow run".equals(entityType) || WorkflowRun.class.getSimpleName().equals(entityType)) {
                         workflowRun = EntityUtil.getWorkflowRun(workflowBeanService.getMaPSeqDAOBean(),
-                                "NIDAUCSFVariantCalling", entityJSONObject, account);
+                                "NECVariantCalling", entityJSONObject, account);
                     }
 
                 }
