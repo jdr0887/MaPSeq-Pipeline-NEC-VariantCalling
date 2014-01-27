@@ -1,0 +1,17 @@
+<features name="mapseq-pipeline-nec-variant-calling-${project.version}">
+
+  <feature name="mapseq-pipeline-nec-variant-calling" version="${project.version}" resolver="(obr)">
+    <bundle>mvn:edu.unc.mapseq.pipelines.nec-variant-calling/nec-variant-calling-workflow/${project.version}</bundle>
+    <bundle>mvn:edu.unc.mapseq.pipelines.nec-variant-calling/nec-variant-calling-commands/${project.version}</bundle>
+    <bundle>mvn:edu.unc.mapseq.pipelines.nec-variant-calling.nec-variant-calling-web/nec-variant-calling-web-service-api/${project.version}</bundle>
+    <bundle>mvn:edu.unc.mapseq.pipelines.nec-variant-calling.nec-variant-calling-web/nec-variant-calling-web-service-impl/${project.version}</bundle>
+    <bundle start-level="100">mvn:edu.unc.mapseq.pipelines.nec-variant-calling/nec-variant-calling-executor/${project.version}</bundle>
+    <bundle start-level="100">mvn:edu.unc.mapseq.pipelines.nec-variant-calling/nec-variant-calling-messaging/${project.version}</bundle>
+  </feature>
+
+</features>
+
+
+
+
+
