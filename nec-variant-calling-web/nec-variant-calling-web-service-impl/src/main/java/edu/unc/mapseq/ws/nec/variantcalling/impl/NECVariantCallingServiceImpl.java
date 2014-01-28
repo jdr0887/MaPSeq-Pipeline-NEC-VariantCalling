@@ -2,6 +2,7 @@ package edu.unc.mapseq.ws.nec.variantcalling.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -147,6 +148,23 @@ public class NECVariantCallingServiceImpl implements NECVariantCallingService {
 
         }
 
+        return ret;
+    }
+
+    @Override
+    public List<QualityControlInfo> lookupQuantificationResultsBySequencerRun(Long sequencerRunId) {
+        List<QualityControlInfo> ret = new ArrayList<QualityControlInfo>();
+        try {
+            List<HTSFSample> htsfSampleList = htsfSampleDAO.findBySequencerRunId(sequencerRunId);
+            if (htsfSampleList != null) {
+                for (HTSFSample sample : htsfSampleList) {
+                    Long htsfSampleId = sample.getId();
+                    ret.add(lookupQuantificationResults(htsfSampleId));
+                }
+            }
+        } catch (MaPSeqDAOException e) {
+            logger.error("MaPSeqDAOException", e);
+        }
         return ret;
     }
 

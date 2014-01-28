@@ -1,5 +1,7 @@
 package edu.unc.mapseq.ws.nec.variantcalling;
 
+import java.util.List;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -27,5 +29,11 @@ public interface NECVariantCallingService {
     @WebMethod
     public QualityControlInfo lookupQuantificationResults(
             @PathParam("htsfSampleId") @WebParam(name = "htsfSampleId") Long htsfSampleId);
+
+    @GET
+    @Path("/lookupQuantificationResultsBySequencerRun/{sequencerRunId}")
+    @WebMethod
+    public List<QualityControlInfo> lookupQuantificationResultsBySequencerRun(
+            @PathParam("sequencerRunId") @WebParam(name = "sequencerRunId") Long sequencerRunId);
 
 }
