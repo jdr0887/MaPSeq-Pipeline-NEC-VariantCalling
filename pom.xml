@@ -2,7 +2,7 @@
   <parent>
     <groupId>edu.unc.mapseq</groupId>
     <artifactId>mapseq</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.10</version>
   </parent>
   <name>MaPSeq :: Pipelines :: NEC Variant Calling</name>
   <modelVersion>4.0.0</modelVersion>
@@ -16,7 +16,6 @@
     <activemq.version>5.8.0</activemq.version>
     <mapseq.version>0.2.45</mapseq.version>
     <mapseq.modules.version>0.0.44</mapseq.modules.version>
-    <renci.commons.version>0.2.0</renci.commons.version>
   </properties>
   <issueManagement>
     <system>gForge</system>
@@ -50,21 +49,6 @@
   </scm>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-      	<groupId>javax.xml.bind</groupId>
-      	<artifactId>jaxb-api</artifactId>
-      	<version>2.2.3</version>
-      </dependency>
-      <dependency>
-      	<groupId>com.sun.xml.bind</groupId>
-      	<artifactId>jaxb-impl</artifactId>
-      	<version>2.2.4-1</version>
-      </dependency>
-      <dependency>
-      	<groupId>com.sun.xml.bind</groupId>
-      	<artifactId>jaxb-xjc</artifactId>
-      	<version>2.2.4-1</version>
-      </dependency>
       <dependency>
       	<groupId>org.apache.geronimo.specs</groupId>
       	<artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
@@ -175,11 +159,6 @@
       	<artifactId>org.osgi.core</artifactId>
       	<version>4.3.1</version>
       	<scope>provided</scope>
-      </dependency>
-      <dependency>
-      	<groupId>org.renci.commons</groupId>
-      	<artifactId>commons-exec</artifactId>
-      	<version>${renci.commons.version}</version>
       </dependency>
       <dependency>
 	<groupId>org.apache.cxf</groupId>
