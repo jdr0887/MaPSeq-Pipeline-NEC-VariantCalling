@@ -149,7 +149,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
 
                 CondorJob dedupedBamJob = WorkflowJobFactory.createJob(++count, PicardMarkDuplicatesCLI.class,
                         getWorkflowPlan(), htsfSample);
-                dedupedBamJob.setInitialDirectory(outputDirectory);
+                dedupedBamJob.setInitialDirectory(outputDirectory.getAbsolutePath());
 
                 dedupedBamJob.addArgument(PicardMarkDuplicatesCLI.INPUT, bamFile.getName());
                 dedupedBamJob.addTransferInput(bamFile.getName());
@@ -166,7 +166,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 // index job
                 CondorJob dedupedBaiJob = WorkflowJobFactory.createJob(++count, SAMToolsIndexCLI.class,
                         getWorkflowPlan(), htsfSample);
-                dedupedBaiJob.setInitialDirectory(outputDirectory);
+                dedupedBaiJob.setInitialDirectory(outputDirectory.getAbsolutePath());
 
                 dedupedBaiJob.addArgument(SAMToolsIndexCLI.INPUT, dedupedBamFile);
                 dedupedBaiJob.addTransferInput(dedupedBamFile);
@@ -182,7 +182,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 // flagstat job
                 CondorJob dedupedRealignFixPrintReadsFlagstatJob = WorkflowJobFactory.createJob(++count,
                         SAMToolsFlagstatCLI.class, getWorkflowPlan(), htsfSample);
-                dedupedRealignFixPrintReadsFlagstatJob.setInitialDirectory(outputDirectory);
+                dedupedRealignFixPrintReadsFlagstatJob.setInitialDirectory(outputDirectory.getAbsolutePath());
 
                 dedupedRealignFixPrintReadsFlagstatJob.addArgument(SAMToolsFlagstatCLI.INPUT, dedupedBamFile);
                 dedupedRealignFixPrintReadsFlagstatJob.addTransferInput(dedupedBamFile);
@@ -262,7 +262,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
         job.addArgument(GATKDepthOfCoverageCLI.OMITDEPTHOUTPUTATEACHBASE);
         job.addArgument(GATKDepthOfCoverageCLI.INTERVALS, intervalList);
 
-        job.setInitialDirectory(outputDirectory);
+        job.setInitialDirectory(outputDirectory.getAbsolutePath());
         job.addTransferInput(sourceFile);
         job.addTransferInput(sourceFileIndex);
 
@@ -334,7 +334,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
         String gatkUnifiedGenotyperMetrics = sourceFile.replace(".bam", ".metrics");
         job.addArgument(GATKUnifiedGenotyperCLI.METRICS, gatkUnifiedGenotyperMetrics);
 
-        job.setInitialDirectory(outputDirectory);
+        job.setInitialDirectory(outputDirectory.getAbsolutePath());
         job.addTransferInput(sourceFile);
         job.addTransferInput(sourceFileIndex);
         job.addTransferOutput(gatkUnifiedGenotyperMetrics);
