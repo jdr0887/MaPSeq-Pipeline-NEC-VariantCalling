@@ -7,10 +7,14 @@
   <reference id="NECVariantCallingWorkflowBeanService" interface="edu.unc.mapseq.workflow.WorkflowBeanService"
     component-name="NECVariantCallingWorkflowBeanService" />
 
-  <bean id="NECVariantCallingMessagingService" class="edu.unc.mapseq.messaging.nec.variantcalling.NECVariantCallingMessagingService"
+  <bean id="NECVariantCallingMessageListener" class="edu.unc.mapseq.messaging.nec.variantcalling.NECVariantCallingMessageListener">
+    <property name="workflowBeanService" ref="NECVariantCallingWorkflowBeanService" />
+  </bean>
+
+  <bean id="NECVariantCallingMessageService" class="edu.unc.mapseq.messaging.nec.variantcalling.NECVariantCallingMessageService"
     init-method="start" destroy-method="stop" activation="eager">
     <property name="connectionFactory" ref="connectionFactory" />
-    <property name="workflowBeanService" ref="NECVariantCallingWorkflowBeanService" />
+    <property name="messageListener" ref="NECVariantCallingMessageListener" />
     <property name="destinationName" value="queue/nec.variantcalling" />
   </bean>
 
