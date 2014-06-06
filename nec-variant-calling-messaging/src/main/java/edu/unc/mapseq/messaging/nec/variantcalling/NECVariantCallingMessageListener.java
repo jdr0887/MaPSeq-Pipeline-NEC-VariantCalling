@@ -1,35 +1,40 @@
 package edu.unc.mapseq.messaging.nec.variantcalling;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.unc.mapseq.dao.AccountDAO;
+import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
+import edu.unc.mapseq.dao.WorkflowDAO;
+import edu.unc.mapseq.dao.WorkflowPlanDAO;
+import edu.unc.mapseq.dao.WorkflowRunDAO;
 import edu.unc.mapseq.dao.model.Account;
 import edu.unc.mapseq.dao.model.HTSFSample;
 import edu.unc.mapseq.dao.model.SequencerRun;
+import edu.unc.mapseq.dao.model.Workflow;
 import edu.unc.mapseq.dao.model.WorkflowPlan;
 import edu.unc.mapseq.dao.model.WorkflowRun;
 import edu.unc.mapseq.dao.model.WorkflowRunStatusType;
-import edu.unc.mapseq.workflow.EntityUtil;
-import edu.unc.mapseq.workflow.WorkflowBeanService;
+import edu.unc.mapseq.workflow.WorkflowException;
+import edu.unc.mapseq.workflow.impl.AbstractMessageListener;
+import edu.unc.mapseq.workflow.model.WorkflowEntity;
+import edu.unc.mapseq.workflow.model.WorkflowMessage;
 
-public class NECVariantCallingMessageListener implements MessageListener {
+public class NECVariantCallingMessageListener extends AbstractMessageListener {
 
     private final Logger logger = LoggerFactory.getLogger(NECVariantCallingMessageListener.class);
-
-    private WorkflowBeanService workflowBeanService;
 
     public NECVariantCallingMessageListener() {
         super();
@@ -58,69 +63,83 @@ public class NECVariantCallingMessageListener implements MessageListener {
 
         logger.info("messageValue: {}", messageValue);
 
-        JSONObject jsonMessage = null;
+        ObjectMapper mapper = new ObjectMapper();
+        WorkflowMessage workflowMessage = null;
 
         try {
-            jsonMessage = new JSONObject(messageValue);
-            if (!jsonMessage.has("entities") || !jsonMessage.has("account_name")) {
-                logger.error("json lacks entities or account_name");
+            workflowMessage = mapper.readValue(messageValue, WorkflowMessage.class);
+            if (StringUtils.isEmpty(workflowMessage.getAccountName())) {
+                logger.error("json lacks account_name");
                 return;
             }
-        } catch (JSONException e) {
+            if (workflowMessage.getEntities() == null) {
+                logger.error("json lacks entities");
+                return;
+            }
+        } catch (IOException e) {
             logger.error("BAD JSON format", e);
             return;
         }
+
+        MaPSeqDAOBean daoBean = getWorkflowBeanService().getMaPSeqDAOBean();
+        AccountDAO accountDAO = daoBean.getAccountDAO();
+        WorkflowDAO workflowDAO = daoBean.getWorkflowDAO();
+        WorkflowRunDAO workflowRunDAO = daoBean.getWorkflowRunDAO();
+        WorkflowPlanDAO workflowPlanDAO = daoBean.getWorkflowPlanDAO();
 
         SequencerRun sequencerRun = null;
         Set<HTSFSample> htsfSampleSet = new HashSet<HTSFSample>();
         WorkflowRun workflowRun = null;
         Account account = null;
 
+        String accountName = workflowMessage.getAccountName();
+
         try {
+            account = accountDAO.findByName(accountName);
+        } catch (MaPSeqDAOException e) {
+        }
 
-            String accountName = jsonMessage.getString("account_name");
+        if (account == null) {
+            logger.error("Must register account first");
+            return;
+        }
 
-            try {
-                account = this.workflowBeanService.getMaPSeqDAOBean().getAccountDAO().findByName(accountName);
-            } catch (MaPSeqDAOException e) {
-            }
+        Workflow workflow = null;
+        String workflowName = "NECVariantCalling";
+        try {
+            workflow = workflowDAO.findByName(workflowName);
+        } catch (MaPSeqDAOException e) {
+            logger.error("ERROR", e);
+        }
 
-            if (account == null) {
-                logger.error("Must register account first");
-                return;
-            }
+        if (workflow == null) {
+            logger.error("No Workflow Found: {}", workflowName);
+            return;
+        }
 
-            JSONArray entityArray = jsonMessage.getJSONArray("entities");
+        try {
+            for (WorkflowEntity entity : workflowMessage.getEntities()) {
 
-            for (int i = 0; i < entityArray.length(); ++i) {
+                if (StringUtils.isNotEmpty(entity.getEntityType())) {
 
-                JSONObject entityJSONObject = entityArray.getJSONObject(i);
-
-                if (entityJSONObject.has("entity_type")) {
-
-                    String entityType = entityJSONObject.getString("entity_type");
-
-                    if ("Sequencer run".equals(entityType) || SequencerRun.class.getSimpleName().equals(entityType)) {
-                        sequencerRun = EntityUtil.getSequencerRun(workflowBeanService.getMaPSeqDAOBean(),
-                                entityJSONObject);
+                    if (SequencerRun.class.getSimpleName().equals(entity.getEntityType())) {
+                        sequencerRun = getSequencerRun(entity);
                     }
 
-                    if ("HTSF Sample".equals(entityType) || HTSFSample.class.getSimpleName().equals(entityType)) {
-                        HTSFSample htsfSample = EntityUtil.getHTSFSample(workflowBeanService.getMaPSeqDAOBean(),
-                                entityJSONObject);
+                    if (HTSFSample.class.getSimpleName().equals(entity.getEntityType())) {
+                        HTSFSample htsfSample = getHTSFSample(entity);
                         htsfSampleSet.add(htsfSample);
                     }
 
-                    if ("Workflow run".equals(entityType) || WorkflowRun.class.getSimpleName().equals(entityType)) {
-                        workflowRun = EntityUtil.getWorkflowRun(workflowBeanService.getMaPSeqDAOBean(),
-                                "NECVariantCalling", entityJSONObject, account);
+                    if (WorkflowRun.class.getSimpleName().equals(entity.getEntityType())) {
+                        workflowRun = getWorkflowRun(workflow, entity, account);
                     }
 
                 }
 
             }
-        } catch (JSONException e1) {
-            e1.printStackTrace();
+        } catch (WorkflowException e1) {
+            logger.error(e1.getMessage(), e1);
             return;
         }
 
@@ -135,7 +154,7 @@ public class NECVariantCallingMessageListener implements MessageListener {
         }
 
         try {
-            Long workflowRunId = workflowBeanService.getMaPSeqDAOBean().getWorkflowRunDAO().save(workflowRun);
+            Long workflowRunId = workflowRunDAO.save(workflowRun);
             workflowRun.setId(workflowRunId);
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
@@ -150,19 +169,11 @@ public class NECVariantCallingMessageListener implements MessageListener {
             if (sequencerRun != null) {
                 workflowPlan.setSequencerRun(sequencerRun);
             }
-            this.workflowBeanService.getMaPSeqDAOBean().getWorkflowPlanDAO().save(workflowPlan);
+            workflowPlanDAO.save(workflowPlan);
         } catch (MaPSeqDAOException e) {
             e.printStackTrace();
         }
 
-    }
-
-    public WorkflowBeanService getWorkflowBeanService() {
-        return workflowBeanService;
-    }
-
-    public void setWorkflowBeanService(WorkflowBeanService workflowBeanService) {
-        this.workflowBeanService = workflowBeanService;
     }
 
 }
