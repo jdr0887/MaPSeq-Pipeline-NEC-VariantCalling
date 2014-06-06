@@ -10,6 +10,7 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.renci.jlrm.condor.CondorJob;
+import org.renci.jlrm.condor.CondorJobBuilder;
 import org.renci.jlrm.condor.CondorJobEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,10 @@ import edu.unc.mapseq.module.picard.PicardAddOrReplaceReadGroups;
 import edu.unc.mapseq.module.picard.PicardMarkDuplicatesCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsFlagstatCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsIndexCLI;
-import edu.unc.mapseq.workflow.AbstractWorkflow;
 import edu.unc.mapseq.workflow.WorkflowException;
-import edu.unc.mapseq.workflow.WorkflowJobFactory;
 import edu.unc.mapseq.workflow.WorkflowUtil;
+import edu.unc.mapseq.workflow.impl.AbstractWorkflow;
+import edu.unc.mapseq.workflow.impl.WorkflowJobFactory;
 
 public class NECVariantCallingWorkflow extends AbstractWorkflow {
 
@@ -147,54 +148,41 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 // deduped job
                 String dedupedBamFile = bamFile.getName().replace(".bam", ".deduped.bam");
 
-                CondorJob dedupedBamJob = WorkflowJobFactory.createJob(++count, PicardMarkDuplicatesCLI.class,
-                        getWorkflowPlan(), htsfSample);
-                dedupedBamJob.setInitialDirectory(outputDirectory.getAbsolutePath());
-
-                dedupedBamJob.addArgument(PicardMarkDuplicatesCLI.INPUT, bamFile.getName());
-                dedupedBamJob.addTransferInput(bamFile.getName());
-
-                dedupedBamJob.addArgument(PicardMarkDuplicatesCLI.OUTPUT, dedupedBamFile);
-                dedupedBamJob.addTransferOutput(dedupedBamFile);
-
+                CondorJobBuilder builder = WorkflowJobFactory.createJob(++count, PicardMarkDuplicatesCLI.class,
+                        getWorkflowPlan(), htsfSample).initialDirectory(outputDirectory.getAbsolutePath());
                 String picardMarkDuplicatesMetricsFile = dedupedBamFile.replace(".bam", ".metrics");
-                dedupedBamJob.addArgument(PicardMarkDuplicatesCLI.METRICSFILE, picardMarkDuplicatesMetricsFile);
-                dedupedBamJob.addTransferOutput(picardMarkDuplicatesMetricsFile);
-
+                builder.addArgument(PicardMarkDuplicatesCLI.INPUT, bamFile.getName())
+                        .addArgument(PicardMarkDuplicatesCLI.OUTPUT, dedupedBamFile)
+                        .addArgument(PicardMarkDuplicatesCLI.METRICSFILE, picardMarkDuplicatesMetricsFile);
+                builder.addTransferInput(bamFile.getName()).addTransferOutput(dedupedBamFile)
+                        .addTransferOutput(picardMarkDuplicatesMetricsFile);
+                CondorJob dedupedBamJob = builder.build();
+                logger.info(dedupedBamJob.toString());
                 graph.addVertex(dedupedBamJob);
 
                 // index job
-                CondorJob dedupedBaiJob = WorkflowJobFactory.createJob(++count, SAMToolsIndexCLI.class,
-                        getWorkflowPlan(), htsfSample);
-                dedupedBaiJob.setInitialDirectory(outputDirectory.getAbsolutePath());
-
-                dedupedBaiJob.addArgument(SAMToolsIndexCLI.INPUT, dedupedBamFile);
-                dedupedBaiJob.addTransferInput(dedupedBamFile);
-
+                builder = WorkflowJobFactory.createJob(++count, SAMToolsIndexCLI.class, getWorkflowPlan(), htsfSample)
+                        .initialDirectory(outputDirectory.getAbsolutePath());
                 String dedupedBaiFile = dedupedBamFile.replace(".bam", ".bai");
-
-                dedupedBaiJob.addArgument(SAMToolsIndexCLI.OUTPUT, dedupedBaiFile);
-                dedupedBaiJob.addTransferOutput(dedupedBaiFile);
-
+                builder.addArgument(SAMToolsIndexCLI.INPUT, dedupedBamFile).addArgument(SAMToolsIndexCLI.OUTPUT,
+                        dedupedBaiFile);
+                builder.addTransferInput(dedupedBamFile).addTransferOutput(dedupedBaiFile);
+                CondorJob dedupedBaiJob = builder.build();
+                logger.info(dedupedBaiJob.toString());
                 graph.addVertex(dedupedBaiJob);
                 graph.addEdge(dedupedBamJob, dedupedBaiJob);
 
                 // flagstat job
-                CondorJob dedupedRealignFixPrintReadsFlagstatJob = WorkflowJobFactory.createJob(++count,
-                        SAMToolsFlagstatCLI.class, getWorkflowPlan(), htsfSample);
-                dedupedRealignFixPrintReadsFlagstatJob.setInitialDirectory(outputDirectory.getAbsolutePath());
-
-                dedupedRealignFixPrintReadsFlagstatJob.addArgument(SAMToolsFlagstatCLI.INPUT, dedupedBamFile);
-                dedupedRealignFixPrintReadsFlagstatJob.addTransferInput(dedupedBamFile);
-
+                builder = WorkflowJobFactory.createJob(++count, SAMToolsFlagstatCLI.class, getWorkflowPlan(),
+                        htsfSample).initialDirectory(outputDirectory.getAbsolutePath());
                 String dedupedRealignFixPrintReadsFlagstatFile = dedupedBamFile.replace(".bam",
                         ".realign.fix.pr.flagstat");
-                dedupedRealignFixPrintReadsFlagstatJob.addArgument(SAMToolsFlagstatCLI.OUTPUT,
+                builder.addArgument(SAMToolsFlagstatCLI.INPUT, dedupedBamFile).addArgument(SAMToolsFlagstatCLI.OUTPUT,
                         dedupedRealignFixPrintReadsFlagstatFile);
-                dedupedRealignFixPrintReadsFlagstatJob.addTransferOutput(dedupedRealignFixPrintReadsFlagstatFile);
-
-                dedupedRealignFixPrintReadsFlagstatJob.addTransferInput(dedupedBaiFile);
-
+                builder.addTransferInput(dedupedBamFile).addTransferOutput(dedupedRealignFixPrintReadsFlagstatFile)
+                        .addTransferInput(dedupedBaiFile);
+                CondorJob dedupedRealignFixPrintReadsFlagstatJob = builder.build();
+                logger.info(dedupedRealignFixPrintReadsFlagstatJob.toString());
                 graph.addVertex(dedupedRealignFixPrintReadsFlagstatJob);
                 graph.addEdge(dedupedBaiJob, dedupedRealignFixPrintReadsFlagstatJob);
 
@@ -246,34 +234,29 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
             String referenceSequence, String GATKKey) {
 
         // create new job - do not persist file data
-        CondorJob job = WorkflowJobFactory
-                .createJob(index, GATKDepthOfCoverageCLI.class, getWorkflowPlan(), htsfSample);
+        CondorJobBuilder builder = WorkflowJobFactory.createJob(index, GATKDepthOfCoverageCLI.class, getWorkflowPlan(),
+                htsfSample).initialDirectory(outputDirectory.getAbsolutePath());
 
         // add source and destination files
-        job.addArgument(GATKDepthOfCoverageCLI.INPUTFILE, sourceFile);
-        job.addArgument(GATKDepthOfCoverageCLI.OUTPUTPREFIX, destFile);
+        builder.addArgument(GATKDepthOfCoverageCLI.INPUTFILE, sourceFile)
+                .addArgument(GATKDepthOfCoverageCLI.OUTPUTPREFIX, destFile)
+                .addArgument(GATKDepthOfCoverageCLI.KEY, GATKKey)
+                .addArgument(GATKDepthOfCoverageCLI.REFERENCESEQUENCE, referenceSequence)
+                .addArgument(GATKDepthOfCoverageCLI.PHONEHOME, GATKPhoneHomeType.NO_ET.toString())
+                .addArgument(GATKDepthOfCoverageCLI.DOWNSAMPLINGTYPE, GATKDownsamplingType.NONE.toString())
+                .addArgument(GATKDepthOfCoverageCLI.VALIDATIONSTRICTNESS, "LENIENT")
+                .addArgument(GATKDepthOfCoverageCLI.OMITDEPTHOUTPUTATEACHBASE)
+                .addArgument(GATKDepthOfCoverageCLI.INTERVALS, intervalList);
 
-        // add arguments
-        job.addArgument(GATKDepthOfCoverageCLI.KEY, GATKKey);
-        job.addArgument(GATKDepthOfCoverageCLI.REFERENCESEQUENCE, referenceSequence);
-        job.addArgument(GATKDepthOfCoverageCLI.PHONEHOME, GATKPhoneHomeType.NO_ET.toString());
-        job.addArgument(GATKDepthOfCoverageCLI.DOWNSAMPLINGTYPE, GATKDownsamplingType.NONE.toString());
-        job.addArgument(GATKDepthOfCoverageCLI.VALIDATIONSTRICTNESS, "LENIENT");
-        job.addArgument(GATKDepthOfCoverageCLI.OMITDEPTHOUTPUTATEACHBASE);
-        job.addArgument(GATKDepthOfCoverageCLI.INTERVALS, intervalList);
+        builder.addTransferInput(sourceFile).addTransferInput(sourceFileIndex)
+                .addTransferOutput(String.format("%s.sample_cumulative_coverage_counts", destFile))
+                .addTransferOutput(String.format("%s.sample_cumulative_coverage_proportions", destFile))
+                .addTransferOutput(String.format("%s.sample_interval_statistics", destFile))
+                .addTransferOutput(String.format("%s.sample_interval_summary", destFile))
+                .addTransferOutput(String.format("%s.sample_statistics", destFile))
+                .addTransferOutput(String.format("%s.sample_summary", destFile));
 
-        job.setInitialDirectory(outputDirectory.getAbsolutePath());
-        job.addTransferInput(sourceFile);
-        job.addTransferInput(sourceFileIndex);
-
-        job.addTransferOutput(String.format("%s.sample_cumulative_coverage_counts", destFile));
-        job.addTransferOutput(String.format("%s.sample_cumulative_coverage_proportions", destFile));
-        job.addTransferOutput(String.format("%s.sample_interval_statistics", destFile));
-        job.addTransferOutput(String.format("%s.sample_interval_summary", destFile));
-        job.addTransferOutput(String.format("%s.sample_statistics", destFile));
-        job.addTransferOutput(String.format("%s.sample_summary", destFile));
-
-        return job;
+        return builder.build();
     }
 
     /**
@@ -297,50 +280,37 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
             String referenceSequence, String GATKKey, String unifiedGenotyperDBSNP) {
 
         // create new job - do not persist file data
-        CondorJob job = WorkflowJobFactory.createJob(index, GATKUnifiedGenotyperCLI.class, getWorkflowPlan(),
-                htsfSample);
+        CondorJobBuilder builder = WorkflowJobFactory
+                .createJob(index, GATKUnifiedGenotyperCLI.class, getWorkflowPlan(), htsfSample)
+                .initialDirectory(outputDirectory.getAbsolutePath()).numberOfProcessors(4);
+        String gatkUnifiedGenotyperMetrics = sourceFile.replace(".bam", ".metrics");
 
         // add source and destination files
-        job.addArgument(GATKUnifiedGenotyperCLI.INPUTFILE, sourceFile);
-        job.addArgument(GATKUnifiedGenotyperCLI.OUT, destFile);
+        builder.addArgument(GATKUnifiedGenotyperCLI.INPUTFILE, sourceFile)
+                .addArgument(GATKUnifiedGenotyperCLI.OUT, destFile).addArgument(GATKUnifiedGenotyperCLI.KEY, GATKKey)
+                .addArgument(GATKUnifiedGenotyperCLI.INTERVALS, intervalList)
+                .addArgument(GATKUnifiedGenotyperCLI.REFERENCESEQUENCE, referenceSequence)
+                .addArgument(GATKUnifiedGenotyperCLI.DBSNP, unifiedGenotyperDBSNP)
+                .addArgument(GATKUnifiedGenotyperCLI.PHONEHOME, GATKPhoneHomeType.NO_ET.toString())
+                .addArgument(GATKUnifiedGenotyperCLI.DOWNSAMPLINGTYPE, GATKDownsamplingType.NONE.toString())
+                .addArgument(GATKUnifiedGenotyperCLI.GENOTYPELIKELIHOODSMODEL, "BOTH")
+                .addArgument(GATKUnifiedGenotyperCLI.OUTPUTMODE, "EMIT_ALL_SITES")
+                .addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "AlleleBalance")
+                .addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "DepthOfCoverage")
+                .addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "HomopolymerRun")
+                .addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "MappingQualityZero")
+                .addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "QualByDepth")
+                .addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "RMSMappingQuality")
+                .addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "HaplotypeScore")
+                .addArgument(GATKUnifiedGenotyperCLI.DOWNSAMPLETOCOVERAGE, "250")
+                .addArgument(GATKUnifiedGenotyperCLI.STANDCALLCONF, "4")
+                .addArgument(GATKUnifiedGenotyperCLI.STANDEMITCONF, "0")
+                .addArgument(GATKUnifiedGenotyperCLI.NUMTHREADS, "4")
+                .addArgument(GATKUnifiedGenotyperCLI.METRICS, gatkUnifiedGenotyperMetrics);
 
-        // add arguments
-        job.addArgument(GATKUnifiedGenotyperCLI.KEY, GATKKey);
-        job.addArgument(GATKUnifiedGenotyperCLI.INTERVALS, intervalList);
-        job.addArgument(GATKUnifiedGenotyperCLI.REFERENCESEQUENCE, referenceSequence);
-        job.addArgument(GATKUnifiedGenotyperCLI.DBSNP, unifiedGenotyperDBSNP);
+        builder.addTransferInput(sourceFile).addTransferInput(sourceFileIndex)
+                .addTransferOutput(gatkUnifiedGenotyperMetrics).addTransferOutput(destFile);
 
-        // set arguments
-        job.addArgument(GATKUnifiedGenotyperCLI.PHONEHOME, GATKPhoneHomeType.NO_ET.toString());
-        job.addArgument(GATKUnifiedGenotyperCLI.DOWNSAMPLINGTYPE, GATKDownsamplingType.NONE.toString());
-        job.addArgument(GATKUnifiedGenotyperCLI.GENOTYPELIKELIHOODSMODEL, "BOTH");
-        job.addArgument(GATKUnifiedGenotyperCLI.OUTPUTMODE, "EMIT_ALL_SITES");
-        job.addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "AlleleBalance");
-        job.addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "DepthOfCoverage");
-        job.addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "HomopolymerRun");
-        job.addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "MappingQualityZero");
-        job.addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "QualByDepth");
-        job.addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "RMSMappingQuality");
-        job.addArgument(GATKUnifiedGenotyperCLI.ANNOTATION, "HaplotypeScore");
-        job.addArgument(GATKUnifiedGenotyperCLI.DOWNSAMPLETOCOVERAGE, "250");
-        job.addArgument(GATKUnifiedGenotyperCLI.STANDCALLCONF, "4");
-        job.addArgument(GATKUnifiedGenotyperCLI.STANDEMITCONF, "0");
-
-        // number of processors
-        job.addArgument(GATKUnifiedGenotyperCLI.NUMTHREADS, "4");
-        job.setNumberOfProcessors(4);
-
-        // metrics file
-        String gatkUnifiedGenotyperMetrics = sourceFile.replace(".bam", ".metrics");
-        job.addArgument(GATKUnifiedGenotyperCLI.METRICS, gatkUnifiedGenotyperMetrics);
-
-        job.setInitialDirectory(outputDirectory.getAbsolutePath());
-        job.addTransferInput(sourceFile);
-        job.addTransferInput(sourceFileIndex);
-        job.addTransferOutput(gatkUnifiedGenotyperMetrics);
-        job.addTransferOutput(destFile);
-
-        return job;
+        return builder.build();
     }
-
 }
