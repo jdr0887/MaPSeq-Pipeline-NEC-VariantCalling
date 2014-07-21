@@ -77,7 +77,8 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
 
         Workflow alignmentWorkflow = null;
         try {
-            alignmentWorkflow = getWorkflowBeanService().getMaPSeqDAOBean().getWorkflowDAO().findByName("NECAlignment");
+            alignmentWorkflow = getWorkflowBeanService().getMaPSeqDAOBean().getWorkflowDAO().findByName("NECAlignment")
+                    .get(0);
         } catch (MaPSeqDAOException e1) {
             e1.printStackTrace();
         }
