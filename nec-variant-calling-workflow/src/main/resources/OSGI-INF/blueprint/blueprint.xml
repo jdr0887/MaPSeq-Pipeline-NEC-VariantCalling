@@ -5,6 +5,7 @@
   <cm:property-placeholder persistent-id="edu.unc.mapseq.workflow.nec.variantcalling"
     update-strategy="reload">
     <cm:default-properties>
+      <cm:property name="siteName" value="Kure" />
       <cm:property name="corePoolSize" value="120" />
       <cm:property name="maxPoolSize" value="120" />
       <cm:property name="referenceSequence"
@@ -58,6 +59,7 @@
     <property name="attributes">
       <map>
         <entry key="referenceSequence" value="${referenceSequence}" />
+        <entry key="siteName" value="${siteName}" />
         <entry key="knownVCF" value="${knownVCF}" />
         <entry key="knownSites" value="${knownSites}" />
         <entry key="depthOfCoverageIntervalList" value="${depthOfCoverageIntervalList}" />
