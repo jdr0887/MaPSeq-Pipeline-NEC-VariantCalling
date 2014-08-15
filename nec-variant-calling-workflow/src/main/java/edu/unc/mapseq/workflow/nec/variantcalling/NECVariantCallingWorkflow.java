@@ -17,10 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.model.FileData;
-import edu.unc.mapseq.dao.model.HTSFSample;
+import edu.unc.mapseq.dao.model.Flowcell;
 import edu.unc.mapseq.dao.model.MimeType;
-import edu.unc.mapseq.dao.model.SequencerRun;
+import edu.unc.mapseq.dao.model.Sample;
 import edu.unc.mapseq.dao.model.Workflow;
+import edu.unc.mapseq.dao.model.WorkflowRunAttempt;
 import edu.unc.mapseq.module.gatk.GATKDownsamplingType;
 import edu.unc.mapseq.module.gatk.GATKPhoneHomeType;
 import edu.unc.mapseq.module.gatk2.GATKDepthOfCoverageCLI;
@@ -31,10 +32,10 @@ import edu.unc.mapseq.module.samtools.SAMToolsFlagstatCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsIndexCLI;
 import edu.unc.mapseq.workflow.WorkflowException;
 import edu.unc.mapseq.workflow.WorkflowUtil;
-import edu.unc.mapseq.workflow.impl.AbstractWorkflow;
+import edu.unc.mapseq.workflow.impl.AbstractSampleWorkflow;
 import edu.unc.mapseq.workflow.impl.WorkflowJobFactory;
 
-public class NECVariantCallingWorkflow extends AbstractWorkflow {
+public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
 
     private final Logger logger = LoggerFactory.getLogger(NECVariantCallingWorkflow.class);
 
@@ -72,8 +73,8 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
         String unifiedGenotyperDBSNP = getWorkflowBeanService().getAttributes().get("unifiedGenotyperDBSNP");
         String GATKKey = getWorkflowBeanService().getAttributes().get("GATKKey");
 
-        Set<HTSFSample> htsfSampleSet = getAggregateHTSFSampleSet();
-        logger.info("htsfSampleSet.size(): {}", htsfSampleSet.size());
+        Set<Sample> sampleSet = getAggregatedSamples();
+        logger.info("sampleSet.size(): {}", sampleSet.size());
 
         Workflow alignmentWorkflow = null;
         try {
@@ -83,20 +84,21 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
             e1.printStackTrace();
         }
 
-        for (HTSFSample htsfSample : htsfSampleSet) {
+        WorkflowRunAttempt attempt = getWorkflowRunAttempt();
 
-            if ("Undetermined".equals(htsfSample.getBarcode())) {
+        for (Sample sample : sampleSet) {
+
+            if ("Undetermined".equals(sample.getBarcode())) {
                 continue;
             }
 
-            SequencerRun sequencerRun = htsfSample.getSequencerRun();
-            File outputDirectory = createOutputDirectory(sequencerRun.getName(), htsfSample,
-                    getName().replace("VariantCalling", ""), getVersion());
+            logger.info(sample.toString());
 
-            logger.info("htsfSample: {}", htsfSample.toString());
-            Integer laneIndex = htsfSample.getLaneIndex();
-            logger.debug("laneIndex = {}", laneIndex);
-            Set<FileData> fileDataSet = htsfSample.getFileDatas();
+            Flowcell flowcell = sample.getFlowcell();
+            File outputDirectory = new File(sample.getOutputDirectory());
+
+            Integer laneIndex = sample.getLaneIndex();
+            Set<FileData> fileDataSet = sample.getFileDatas();
 
             File bamFile = null;
 
@@ -109,8 +111,8 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 bamFile = possibleVCFFileList.get(0);
             }
 
-            String soughtAfterFileName = String.format("%s_%s_L%03d.fixed-rg.bam", sequencerRun.getName(),
-                    htsfSample.getBarcode(), htsfSample.getLaneIndex());
+            String soughtAfterFileName = String.format("%s_%s_L%03d.fixed-rg.bam", flowcell.getName(),
+                    sample.getBarcode(), sample.getLaneIndex());
 
             // 2nd attempt to find bam file
             if (bamFile == null) {
@@ -150,7 +152,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 File dedupedBamFile = new File(outputDirectory, bamFile.getName().replace(".bam", ".deduped.bam"));
 
                 CondorJobBuilder builder = WorkflowJobFactory.createJob(++count, PicardMarkDuplicatesCLI.class,
-                        getWorkflowPlan(), htsfSample).siteName(siteName);
+                        attempt, sample).siteName(siteName);
                 File picardMarkDuplicatesMetricsFile = new File(outputDirectory, dedupedBamFile.getName().replace(
                         ".bam", ".metrics"));
                 builder.addArgument(PicardMarkDuplicatesCLI.INPUT, bamFile.getAbsolutePath())
@@ -162,8 +164,8 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 graph.addVertex(dedupedBamJob);
 
                 // index job
-                builder = WorkflowJobFactory.createJob(++count, SAMToolsIndexCLI.class, getWorkflowPlan(), htsfSample)
-                        .siteName(siteName);
+                builder = WorkflowJobFactory.createJob(++count, SAMToolsIndexCLI.class, attempt, sample).siteName(
+                        siteName);
                 File dedupedBaiFile = new File(outputDirectory, dedupedBamFile.getName().replace(".bam", ".bai"));
                 builder.addArgument(SAMToolsIndexCLI.INPUT, dedupedBamFile.getAbsolutePath()).addArgument(
                         SAMToolsIndexCLI.OUTPUT, dedupedBaiFile.getAbsolutePath());
@@ -173,8 +175,8 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 graph.addEdge(dedupedBamJob, dedupedBaiJob);
 
                 // flagstat job
-                builder = WorkflowJobFactory.createJob(++count, SAMToolsFlagstatCLI.class, getWorkflowPlan(),
-                        htsfSample).siteName(siteName);
+                builder = WorkflowJobFactory.createJob(++count, SAMToolsFlagstatCLI.class, attempt, sample).siteName(
+                        siteName);
                 File dedupedRealignFixPrintReadsFlagstatFile = new File(outputDirectory, dedupedBamFile.getName()
                         .replace(".bam", ".realign.fix.pr.flagstat"));
                 builder.addArgument(SAMToolsFlagstatCLI.INPUT, dedupedBamFile.getAbsolutePath()).addArgument(
@@ -185,8 +187,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
                 graph.addEdge(dedupedBaiJob, dedupedRealignFixPrintReadsFlagstatJob);
 
                 // depth of coverage job
-                builder = WorkflowJobFactory
-                        .createJob(++count, GATKDepthOfCoverageCLI.class, getWorkflowPlan(), htsfSample)
+                builder = WorkflowJobFactory.createJob(++count, GATKDepthOfCoverageCLI.class, attempt, sample)
                         .siteName(siteName).initialDirectory(outputDirectory.getAbsolutePath());
                 builder.addArgument(GATKDepthOfCoverageCLI.INPUTFILE, dedupedBamFile.getAbsolutePath())
                         .addArgument(GATKDepthOfCoverageCLI.OUTPUTPREFIX,
@@ -204,8 +205,7 @@ public class NECVariantCallingWorkflow extends AbstractWorkflow {
 
                 // unified genotyper job
 
-                builder = WorkflowJobFactory
-                        .createJob(++count, GATKUnifiedGenotyperCLI.class, getWorkflowPlan(), htsfSample)
+                builder = WorkflowJobFactory.createJob(++count, GATKUnifiedGenotyperCLI.class, attempt, sample)
                         .siteName(siteName).numberOfProcessors(4);
                 File dedupedRealignFixPrintReadsVcfFile = new File(outputDirectory, dedupedBamFile.getName().replace(
                         ".bam", ".realign.fix.pr.vcf"));
