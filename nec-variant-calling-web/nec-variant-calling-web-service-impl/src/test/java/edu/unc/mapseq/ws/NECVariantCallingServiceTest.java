@@ -58,7 +58,7 @@ public class NECVariantCallingServiceTest {
                 String.format("http://%s:%d/cxf/NECVariantCallingService", host, 8181));
         NECVariantCallingService webService = service.getPort(NECVariantCallingService.class);
 
-        QualityControlInfo results1 = webService.lookupQuantificationResults(1811449L);
+        QualityControlInfo results1 = webService.lookupQuantificationResults(1934820L);
 
         try {
             JAXBContext context = JAXBContext.newInstance(QualityControlInfo.class);

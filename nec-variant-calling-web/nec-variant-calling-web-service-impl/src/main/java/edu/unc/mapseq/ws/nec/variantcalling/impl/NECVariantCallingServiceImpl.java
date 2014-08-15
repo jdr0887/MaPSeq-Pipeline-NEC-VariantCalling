@@ -13,11 +13,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.unc.mapseq.dao.HTSFSampleDAO;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
+import edu.unc.mapseq.dao.SampleDAO;
 import edu.unc.mapseq.dao.model.FileData;
-import edu.unc.mapseq.dao.model.HTSFSample;
 import edu.unc.mapseq.dao.model.MimeType;
+import edu.unc.mapseq.dao.model.Sample;
 import edu.unc.mapseq.ws.nec.variantcalling.NECVariantCallingService;
 import edu.unc.mapseq.ws.nec.variantcalling.QualityControlInfo;
 
@@ -25,19 +25,19 @@ public class NECVariantCallingServiceImpl implements NECVariantCallingService {
 
     private final Logger logger = LoggerFactory.getLogger(NECVariantCallingServiceImpl.class);
 
-    private HTSFSampleDAO htsfSampleDAO;
+    private SampleDAO sampleDAO;
 
     @Override
-    public QualityControlInfo lookupQuantificationResults(Long htsfSampleId) {
+    public QualityControlInfo lookupQuantificationResults(Long sampleId) {
         logger.debug("ENTERING lookupQuantificationResults(Long)");
-        HTSFSample sample = null;
-        if (htsfSampleId == null) {
+        Sample sample = null;
+        if (sampleId == null) {
             logger.warn("htsfSampleId is null");
             return null;
         }
 
         try {
-            sample = htsfSampleDAO.findById(htsfSampleId);
+            sample = sampleDAO.findById(sampleId);
             logger.info(sample.toString());
         } catch (MaPSeqDAOException e) {
             logger.error("Failed to find Sample", e);
@@ -152,12 +152,12 @@ public class NECVariantCallingServiceImpl implements NECVariantCallingService {
     }
 
     @Override
-    public List<QualityControlInfo> lookupQuantificationResultsBySequencerRun(Long sequencerRunId) {
+    public List<QualityControlInfo> lookupQuantificationResultsBySequencerRun(Long flowcellId) {
         List<QualityControlInfo> ret = new ArrayList<QualityControlInfo>();
         try {
-            List<HTSFSample> htsfSampleList = htsfSampleDAO.findBySequencerRunId(sequencerRunId);
-            if (htsfSampleList != null) {
-                for (HTSFSample sample : htsfSampleList) {
+            List<Sample> sampleList = sampleDAO.findByFlowcellId(flowcellId);
+            if (sampleList != null) {
+                for (Sample sample : sampleList) {
                     Long htsfSampleId = sample.getId();
                     ret.add(lookupQuantificationResults(htsfSampleId));
                 }
@@ -168,12 +168,12 @@ public class NECVariantCallingServiceImpl implements NECVariantCallingService {
         return ret;
     }
 
-    public HTSFSampleDAO getHtsfSampleDAO() {
-        return htsfSampleDAO;
+    public SampleDAO getSampleDAO() {
+        return sampleDAO;
     }
 
-    public void setHtsfSampleDAO(HTSFSampleDAO htsfSampleDAO) {
-        this.htsfSampleDAO = htsfSampleDAO;
+    public void setSampleDAO(SampleDAO sampleDAO) {
+        this.sampleDAO = sampleDAO;
     }
 
 }

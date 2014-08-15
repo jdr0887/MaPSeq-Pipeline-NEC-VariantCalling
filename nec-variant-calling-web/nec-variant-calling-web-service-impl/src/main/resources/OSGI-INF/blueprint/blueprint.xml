@@ -11,10 +11,10 @@
   http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
   ">
 
-  <reference id="htsfSampleDAO" interface="edu.unc.mapseq.dao.HTSFSampleDAO" />
+  <reference id="sampleDAO" interface="edu.unc.mapseq.dao.SampleDAO" />
 
   <bean id="NECVariantCalling" class="edu.unc.mapseq.ws.nec.variantcalling.impl.NECVariantCallingServiceImpl">
-    <property name="htsfSampleDAO" ref="htsfSampleDAO" />
+    <property name="sampleDAO" ref="sampleDAO" />
   </bean>
 
   <jaxrs:server id="NECVariantCallingServiceRS" address="/NECVariantCalling">
