@@ -32,7 +32,7 @@ public class NECVariantCallingServiceImpl implements NECVariantCallingService {
         logger.debug("ENTERING lookupQuantificationResults(Long)");
         Sample sample = null;
         if (sampleId == null) {
-            logger.warn("htsfSampleId is null");
+            logger.warn("sampleId is null");
             return null;
         }
 
@@ -152,14 +152,14 @@ public class NECVariantCallingServiceImpl implements NECVariantCallingService {
     }
 
     @Override
-    public List<QualityControlInfo> lookupQuantificationResultsBySequencerRun(Long flowcellId) {
+    public List<QualityControlInfo> lookupQuantificationResultsByFlowcell(Long flowcellId) {
         List<QualityControlInfo> ret = new ArrayList<QualityControlInfo>();
         try {
             List<Sample> sampleList = sampleDAO.findByFlowcellId(flowcellId);
             if (sampleList != null) {
                 for (Sample sample : sampleList) {
-                    Long htsfSampleId = sample.getId();
-                    ret.add(lookupQuantificationResults(htsfSampleId));
+                    Long sampleId = sample.getId();
+                    ret.add(lookupQuantificationResults(sampleId));
                 }
             }
         } catch (MaPSeqDAOException e) {
