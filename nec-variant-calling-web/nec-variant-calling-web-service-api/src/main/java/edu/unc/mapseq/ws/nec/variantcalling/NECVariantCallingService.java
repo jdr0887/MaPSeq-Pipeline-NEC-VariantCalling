@@ -25,15 +25,15 @@ import javax.xml.ws.BindingType;
 public interface NECVariantCallingService {
 
     @GET
-    @Path("/lookupQuantificationResults/{htsfSampleId}")
+    @Path("/lookupQuantificationResults/{sampleId}")
     @WebMethod
     public QualityControlInfo lookupQuantificationResults(
-            @PathParam("htsfSampleId") @WebParam(name = "htsfSampleId") Long htsfSampleId);
+            @PathParam("sampleId") @WebParam(name = "sampleId") Long sampleId);
 
     @GET
-    @Path("/lookupQuantificationResultsBySequencerRun/{sequencerRunId}")
+    @Path("/lookupQuantificationResultsByFlowcell/{flowcellId}")
     @WebMethod
-    public List<QualityControlInfo> lookupQuantificationResultsBySequencerRun(
-            @PathParam("sequencerRunId") @WebParam(name = "sequencerRunId") Long sequencerRunId);
+    public List<QualityControlInfo> lookupQuantificationResultsByFlowcell(
+            @PathParam("flowcellId") @WebParam(name = "flowcellId") Long flowcellId);
 
 }
