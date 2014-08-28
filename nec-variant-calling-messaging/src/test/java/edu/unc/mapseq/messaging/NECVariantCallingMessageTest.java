@@ -34,7 +34,7 @@ public class NECVariantCallingMessageTest {
             Destination destination = session.createQueue("queue/nec.variantcalling");
             MessageProducer producer = session.createProducer(destination);
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-            String format = "{\"entities\":[{\"entity_type\":\"Sample\",\"guid\":\"%d\"},{\"entity_type\":\"WorkflowRun\",\"name\":\"%s-%d\"}]}";
+            String format = "{\"entities\":[{\"entityType\":\"Sample\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s-%d\"}]}";
             producer.send(session.createTextMessage(String.format(format, "rc_renci.svc", 67401,
                     "jdr-test-nec-variant-calling", 67401)));
         } catch (JMSException e) {
@@ -57,17 +57,17 @@ public class NECVariantCallingMessageTest {
         String host = "biodev2.its.unc.edu";
         service.addPort(portQName, SOAPBinding.SOAP11HTTP_MTOM_BINDING,
                 String.format("http://%s:%d/cxf/SampleService", host, 8181));
-        SampleService htsfSampleService = service.getPort(SampleService.class);
+        SampleService sampleService = service.getPort(SampleService.class);
 
         List<Sample> sampleList = new ArrayList<Sample>();
 
-        sampleList.addAll(htsfSampleService.findByFlowcellId(191541L));
-        sampleList.addAll(htsfSampleService.findByFlowcellId(191738L));
-        // sampleList.addAll(htsfSampleService.findBySequencerRunId(190345L));
-        // sampleList.addAll(htsfSampleService.findBySequencerRunId(190520L));
-        // sampleList.addAll(htsfSampleService.findBySequencerRunId(191372L));
-        // sampleList.addAll(htsfSampleService.findBySequencerRunId(192405L));
-        // sampleList.addAll(htsfSampleService.findBySequencerRunId(191192L));
+        sampleList.addAll(sampleService.findByFlowcellId(191541L));
+        sampleList.addAll(sampleService.findByFlowcellId(191738L));
+        // sampleList.addAll(sampleService.findByFlowcellId(190345L));
+        // sampleList.addAll(sampleService.findByFlowcellId(190520L));
+        // sampleList.addAll(sampleService.findByFlowcellId(191372L));
+        // sampleList.addAll(sampleService.findByFlowcellId(192405L));
+        // sampleList.addAll(sampleService.findByFlowcellId(191192L));
 
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(String.format("nio://%s:61616",
                 "biodev2.its.unc.edu"));
@@ -79,7 +79,7 @@ public class NECVariantCallingMessageTest {
             Destination destination = session.createQueue("queue/nec.variantcalling");
             MessageProducer producer = session.createProducer(destination);
             producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-            String format = "{\"entities\":[{\"entity_type\":\"Sample\",\"guid\":\"%d\"},{\"entity_type\":\"WorkflowRun\",\"name\":\"%s_L%d_%s_GATK\"}]}";
+            String format = "{\"entities\":[{\"entityType\":\"Sample\",\"id\":\"%d\"},{\"entityType\":\"WorkflowRun\",\"name\":\"%s_L%d_%s_GATK\"}]}";
             for (Sample sample : sampleList) {
 
                 if ("Undetermined".equals(sample.getBarcode())) {
