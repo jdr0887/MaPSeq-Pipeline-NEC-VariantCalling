@@ -1,4 +1,4 @@
-<features name="mapseq-pipeline-nec-variant-calling-${project.version}">
+<features name="mapseq-pipeline-nec-variant-calling-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
 
   <feature name="mapseq-pipeline-nec-variant-calling" version="${project.version}" resolver="(obr)">
     <bundle>mvn:edu.unc.mapseq.pipelines.nec-variant-calling/nec-variant-calling-workflow/${project.version}</bundle>
