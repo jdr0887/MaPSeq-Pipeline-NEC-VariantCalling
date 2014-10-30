@@ -95,7 +95,7 @@ public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
             logger.info(sample.toString());
 
             Flowcell flowcell = sample.getFlowcell();
-            File outputDirectory = new File(sample.getOutputDirectory(), getName());
+            File outputDirectory = new File(sample.getOutputDirectory(), "NEC");
             File tmpDirectory = new File(outputDirectory, "tmp");
             tmpDirectory.mkdirs();
 
