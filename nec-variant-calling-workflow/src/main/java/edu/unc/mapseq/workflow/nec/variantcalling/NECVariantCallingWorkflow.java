@@ -95,7 +95,7 @@ public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
             logger.info(sample.toString());
 
             Flowcell flowcell = sample.getFlowcell();
-            File outputDirectory = new File(sample.getOutputDirectory(), "NEC");
+            File outputDirectory = new File(sample.getOutputDirectory(), getName());
             File tmpDirectory = new File(outputDirectory, "tmp");
             tmpDirectory.mkdirs();
 
@@ -129,7 +129,8 @@ public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
             // 3rd attempt to find bam file
             if (bamFile == null) {
                 logger.debug("still looking for: {}", soughtAfterFileName);
-                for (File outputDirFile : outputDirectory.listFiles()) {
+		File necAlignmentOutputDirectory = new File(sample.getOutputDirectory(), "NECAlignment");		
+                for (File outputDirFile : necAlignmentOutputDirectory.listFiles()) {
                     if (outputDirFile.getName().equals(soughtAfterFileName)) {
                         bamFile = outputDirFile;
                         break;
