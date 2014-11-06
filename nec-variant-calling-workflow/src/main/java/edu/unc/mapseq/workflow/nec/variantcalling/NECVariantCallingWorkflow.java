@@ -129,7 +129,7 @@ public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
             // 3rd attempt to find bam file
             if (bamFile == null) {
                 logger.debug("still looking for: {}", soughtAfterFileName);
-		File necAlignmentOutputDirectory = new File(sample.getOutputDirectory(), "NECAlignment");		
+                File necAlignmentOutputDirectory = new File(sample.getOutputDirectory(), "NECAlignment");
                 for (File outputDirFile : necAlignmentOutputDirectory.listFiles()) {
                     if (outputDirFile.getName().equals(soughtAfterFileName)) {
                         bamFile = outputDirFile;
