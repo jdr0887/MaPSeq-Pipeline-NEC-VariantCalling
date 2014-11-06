@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines</groupId>
   <artifactId>nec-variant-calling</artifactId>
-  <version>0.5.19-SNAPSHOT</version>
+  <version>0.5.19</version>
   <packaging>pom</packaging>
   <issueManagement>
     <system>gForge</system>
@@ -39,7 +39,7 @@
   <scm>
     <developerConnection>scm:git:ssh://${user.name}@code.renci.org/gitroot/mps_nec_vc_pl</developerConnection>
     <connection>scm:git:ssh://developername@code.renci.org/gitroot/mps_nec_vc_pl</connection>
-    <tag>HEAD</tag>
+    <tag>nec-variant-calling-0.5.19</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
@@ -51,12 +51,12 @@
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.nec-variant-calling</groupId>
       	<artifactId>nec-variant-calling-workflow</artifactId>
-      	<version>0.5.19-SNAPSHOT</version>
+      	<version>0.5.19</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.nec-variant-calling.nec-variant-calling-web</groupId>
       	<artifactId>nec-variant-calling-web-service-api</artifactId>
-      	<version>0.5.19-SNAPSHOT</version>
+      	<version>0.5.19</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
