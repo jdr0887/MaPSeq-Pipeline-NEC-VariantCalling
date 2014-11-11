@@ -6,8 +6,8 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
+import edu.unc.mapseq.commons.nec.variantcalling.SaveDepthOfCoverageAttributesRunnable;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
-import edu.unc.mapseq.nec.variantcalling.SaveDepthOfCoverageAttributesRunnable;
 
 @Command(scope = "nec-variant-calling", name = "save-depth-of-coverage-attributes", description = "Save DepthOfCoverage Attributes")
 public class SaveDepthOfCoverageAttributesAction extends AbstractAction {

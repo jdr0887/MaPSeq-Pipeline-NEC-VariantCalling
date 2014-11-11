@@ -6,8 +6,8 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
+import edu.unc.mapseq.commons.nec.variantcalling.SaveFlagstatAttributesRunnable;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
-import edu.unc.mapseq.nec.variantcalling.SaveFlagstatAttributesRunnable;
 
 @Command(scope = "nec-variant-calling", name = "save-flagstat-attributes", description = "Save Flagstat Attributes")
 public class SaveFlagstatAttributesAction extends AbstractAction {

@@ -17,6 +17,8 @@ import org.renci.jlrm.condor.CondorJobEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.unc.mapseq.commons.nec.variantcalling.SaveDepthOfCoverageAttributesRunnable;
+import edu.unc.mapseq.commons.nec.variantcalling.SaveFlagstatAttributesRunnable;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.model.FileData;
 import edu.unc.mapseq.dao.model.Flowcell;
@@ -32,8 +34,6 @@ import edu.unc.mapseq.module.picard.PicardAddOrReplaceReadGroups;
 import edu.unc.mapseq.module.picard.PicardMarkDuplicatesCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsFlagstatCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsIndexCLI;
-import edu.unc.mapseq.nec.variantcalling.SaveDepthOfCoverageAttributesRunnable;
-import edu.unc.mapseq.nec.variantcalling.SaveFlagstatAttributesRunnable;
 import edu.unc.mapseq.workflow.WorkflowException;
 import edu.unc.mapseq.workflow.WorkflowUtil;
 import edu.unc.mapseq.workflow.impl.AbstractSampleWorkflow;
