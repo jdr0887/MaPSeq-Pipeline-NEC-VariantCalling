@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
 import org.jgrapht.DirectedGraph;
@@ -30,6 +32,8 @@ import edu.unc.mapseq.module.picard.PicardAddOrReplaceReadGroups;
 import edu.unc.mapseq.module.picard.PicardMarkDuplicatesCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsFlagstatCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsIndexCLI;
+import edu.unc.mapseq.nec.variantcalling.SaveDepthOfCoverageAttributesRunnable;
+import edu.unc.mapseq.nec.variantcalling.SaveFlagstatAttributesRunnable;
 import edu.unc.mapseq.workflow.WorkflowException;
 import edu.unc.mapseq.workflow.WorkflowUtil;
 import edu.unc.mapseq.workflow.impl.AbstractSampleWorkflow;
@@ -248,6 +252,34 @@ public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
         }
 
         return graph;
+    }
+
+    @Override
+    public void postRun() throws WorkflowException {
+        super.postRun();
+
+        Set<Sample> sampleSet = getAggregatedSamples();
+
+        for (Sample sample : sampleSet) {
+
+            if ("Undetermined".equals(sample.getBarcode())) {
+                continue;
+            }
+
+            ExecutorService es = Executors.newSingleThreadExecutor();
+
+            SaveFlagstatAttributesRunnable flagstatRunnable = new SaveFlagstatAttributesRunnable();
+            flagstatRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
+            flagstatRunnable.setSampleId(sample.getId());
+            es.execute(flagstatRunnable);
+
+            SaveDepthOfCoverageAttributesRunnable docRunnable = new SaveDepthOfCoverageAttributesRunnable();
+            docRunnable.setMapseqDAOBean(getWorkflowBeanService().getMaPSeqDAOBean());
+            docRunnable.setSampleId(sample.getId());
+            es.execute(docRunnable);
+
+        }
+
     }
 
 }
