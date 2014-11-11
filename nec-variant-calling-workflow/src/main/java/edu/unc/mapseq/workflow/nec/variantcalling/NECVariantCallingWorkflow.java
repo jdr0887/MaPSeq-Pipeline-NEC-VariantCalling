@@ -282,4 +282,9 @@ public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
 
     }
 
+    @Override
+    public void cleanUp() throws WorkflowException {
+        // do nothing
+    }
+
 }
