@@ -53,12 +53,12 @@ public class NECVariantCallingServiceTest {
         QName serviceQName = new QName("http://variantcalling.nec.ws.mapseq.unc.edu", "NECVariantCallingService");
         QName portQName = new QName("http://variantcalling.nec.ws.mapseq.unc.edu", "NECVariantCallingPort");
         Service service = Service.create(serviceQName);
-        String host = "biodev2.its.unc.edu";
+        String host = "152.19.198.146";
         service.addPort(portQName, SOAPBinding.SOAP11HTTP_MTOM_BINDING,
                 String.format("http://%s:%d/cxf/NECVariantCallingService", host, 8181));
         NECVariantCallingService webService = service.getPort(NECVariantCallingService.class);
 
-        QualityControlInfo results1 = webService.lookupQuantificationResults(1934820L);
+        QualityControlInfo results1 = webService.lookupQuantificationResults(2202538L);
 
         try {
             JAXBContext context = JAXBContext.newInstance(QualityControlInfo.class);
