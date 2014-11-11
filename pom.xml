@@ -58,11 +58,17 @@
       	<artifactId>nec-variant-calling-web-service-api</artifactId>
       	<version>0.5.23-SNAPSHOT</version>
       </dependency>
+      <dependency>
+	<groupId>edu.unc.mapseq.pipelines.nec-variant-calling</groupId>
+	<artifactId>nec-variant-calling-commons</artifactId>
+      	<version>0.5.23-SNAPSHOT</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <modules>
     <module>nec-variant-calling-workflow</module>
     <module>nec-variant-calling-executor</module>
+    <module>nec-variant-calling-commons</module>
     <module>nec-variant-calling-commands</module>
     <module>nec-variant-calling-features</module>
     <module>nec-variant-calling-web</module>
