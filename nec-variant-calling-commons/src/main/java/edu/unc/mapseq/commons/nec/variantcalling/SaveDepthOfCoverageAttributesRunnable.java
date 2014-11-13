@@ -15,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.unc.mapseq.config.MaPSeqConfigurationService;
 import edu.unc.mapseq.dao.MaPSeqDAOBean;
 import edu.unc.mapseq.dao.MaPSeqDAOException;
 import edu.unc.mapseq.dao.SampleDAO;
@@ -31,8 +30,6 @@ public class SaveDepthOfCoverageAttributesRunnable implements Runnable {
     private Long flowcellId;
 
     private MaPSeqDAOBean mapseqDAOBean;
-
-    private MaPSeqConfigurationService mapseqConfigurationService;
 
     @Override
     public void run() {
@@ -60,7 +57,7 @@ public class SaveDepthOfCoverageAttributesRunnable implements Runnable {
 
         for (Sample sample : sampleSet) {
 
-            File outputDirectory = new File(sample.getOutputDirectory(), "NCGenes");
+            File outputDirectory = new File(sample.getOutputDirectory(), "NECVariantCalling");
 
             if (!outputDirectory.exists()) {
                 continue;
@@ -228,14 +225,6 @@ public class SaveDepthOfCoverageAttributesRunnable implements Runnable {
 
     public void setMapseqDAOBean(MaPSeqDAOBean mapseqDAOBean) {
         this.mapseqDAOBean = mapseqDAOBean;
-    }
-
-    public MaPSeqConfigurationService getMapseqConfigurationService() {
-        return mapseqConfigurationService;
-    }
-
-    public void setMapseqConfigurationService(MaPSeqConfigurationService mapseqConfigurationService) {
-        this.mapseqConfigurationService = mapseqConfigurationService;
     }
 
 }
