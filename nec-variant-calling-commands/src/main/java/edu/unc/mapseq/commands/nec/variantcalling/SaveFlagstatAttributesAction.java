@@ -12,7 +12,7 @@ import edu.unc.mapseq.dao.MaPSeqDAOBean;
 @Command(scope = "nec-variant-calling", name = "save-flagstat-attributes", description = "Save Flagstat Attributes")
 public class SaveFlagstatAttributesAction extends AbstractAction {
 
-    @Option(name = "--sampleId", description = "sampleId", required = true, multiValued = false)
+    @Option(name = "--sampleId", description = "sampleId", required = false, multiValued = false)
     private Long sampleId;
 
     @Option(name = "--flowcellId", description = "flowcellId", required = false, multiValued = false)
