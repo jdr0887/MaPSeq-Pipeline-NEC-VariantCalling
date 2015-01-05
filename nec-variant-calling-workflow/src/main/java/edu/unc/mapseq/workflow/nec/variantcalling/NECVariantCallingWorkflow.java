@@ -1,7 +1,6 @@
 package edu.unc.mapseq.workflow.nec.variantcalling;
 
 import java.io.File;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -35,9 +34,9 @@ import edu.unc.mapseq.module.picard.PicardMarkDuplicatesCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsFlagstatCLI;
 import edu.unc.mapseq.module.samtools.SAMToolsIndexCLI;
 import edu.unc.mapseq.workflow.WorkflowException;
-import edu.unc.mapseq.workflow.WorkflowUtil;
 import edu.unc.mapseq.workflow.impl.AbstractSampleWorkflow;
 import edu.unc.mapseq.workflow.impl.WorkflowJobFactory;
+import edu.unc.mapseq.workflow.impl.WorkflowUtil;
 
 public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
 
@@ -105,16 +104,9 @@ public class NECVariantCallingWorkflow extends AbstractSampleWorkflow {
 
             Set<FileData> fileDataSet = sample.getFileDatas();
 
-            File bamFile = null;
-
-            // 1st attempt to find bam file
-            List<File> possibleVCFFileList = WorkflowUtil.lookupFileByJobAndMimeTypeAndWorkflowId(fileDataSet,
-                    getWorkflowBeanService().getMaPSeqDAOBean(), PicardAddOrReplaceReadGroups.class,
-                    MimeType.APPLICATION_BAM, alignmentWorkflow.getId());
-
-            if (possibleVCFFileList != null && possibleVCFFileList.size() > 0) {
-                bamFile = possibleVCFFileList.get(0);
-            }
+            File bamFile = WorkflowUtil.findFileByJobAndMimeTypeAndWorkflowId(getWorkflowBeanService()
+                    .getMaPSeqDAOBean(), fileDataSet, PicardAddOrReplaceReadGroups.class, MimeType.APPLICATION_BAM,
+                    alignmentWorkflow.getId());
 
             String soughtAfterFileName = String.format("%s_%s_L%03d.fixed-rg.bam", flowcell.getName(),
                     sample.getBarcode(), sample.getLaneIndex());
