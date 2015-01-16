@@ -2,13 +2,13 @@
   <parent>
     <groupId>edu.unc.mapseq.pipelines.nec-variant-calling</groupId>
     <artifactId>nec-variant-calling-web</artifactId>
-    <version>0.5.33</version>
+    <version>0.5.34-SNAPSHOT</version>
   </parent>
   <name>MaPSeq :: Pipelines :: NEC Variant Calling :: Web :: Web Service Impl</name>
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines.nec-variant-calling.nec-variant-calling-web</groupId>
   <artifactId>nec-variant-calling-web-service-impl</artifactId>
-  <version>0.5.33</version>
+  <version>0.5.34-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
