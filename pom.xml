@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.unc.mapseq.pipelines</groupId>
   <artifactId>nec-variant-calling</artifactId>
-  <version>0.5.35-SNAPSHOT</version>
+  <version>0.5.35</version>
   <packaging>pom</packaging>
   <issueManagement>
     <system>GitHub Issues</system>
@@ -26,7 +26,7 @@
     <url>https://github.com/jdr0887/MaPSeq-Pipeline-NEC-VariantCalling</url>
     <developerConnection>scm:git:git@github.com:jdr0887/MaPSeq-Pipeline-NEC-VariantCalling.git</developerConnection>
     <connection>scm:git:git@github.com:jdr0887/MaPSeq-Pipeline-NEC-VariantCalling.git</connection>
-    <tag>HEAD</tag>
+    <tag>nec-variant-calling-0.5.35</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
@@ -38,17 +38,17 @@
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.nec-variant-calling</groupId>
       	<artifactId>nec-variant-calling-workflow</artifactId>
-      	<version>0.5.35-SNAPSHOT</version>
+      	<version>0.5.35</version>
       </dependency>
       <dependency>
       	<groupId>edu.unc.mapseq.pipelines.nec-variant-calling.nec-variant-calling-web</groupId>
       	<artifactId>nec-variant-calling-web-service-api</artifactId>
-      	<version>0.5.35-SNAPSHOT</version>
+      	<version>0.5.35</version>
       </dependency>
       <dependency>
 	<groupId>edu.unc.mapseq.pipelines.nec-variant-calling</groupId>
 	<artifactId>nec-variant-calling-commons</artifactId>
-      	<version>0.5.35-SNAPSHOT</version>
+      	<version>0.5.35</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
